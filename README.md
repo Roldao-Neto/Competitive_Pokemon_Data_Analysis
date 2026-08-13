@@ -1,2 +1,14 @@
 # Competitive_Pokemon_Data_Analysis
-An University Project of Data Engineering where I use the following datasets to make some data analysis after treatment:
+
+This is an University Project of Data Engineering where I use the following datasets:
+
+- [Smogon Stats on Pokemon Showdown](https://www.smogon.com/stats/): for competitive pokemon metadata
+- [PokeAPI](https://pokeapi.co/): for Pokemon data
+
+## Project Structure:
+
+//todo
+
+## Licence:
+
+Apache License 2.0
