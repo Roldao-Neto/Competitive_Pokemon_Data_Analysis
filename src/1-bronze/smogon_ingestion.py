@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 
 import requests
+from tqdm import tqdm
 
 # %% Global Variables
 
@@ -76,7 +77,7 @@ download_urls: list[str] = []
 for item in dates_url:
     r = await_response(item)
     
-    gen9_data: list[str] = re.findall(r'<a href="(gen9[^"/]+.json.gz)">', r.text)
+    gen9_data: list[str] = re.findall(r'<a href="(gen9[^"/]+.json)">', r.text)
     
     for i in gen9_data:
         for j in DESIRED_CATEGORIES:
@@ -88,13 +89,13 @@ for item in dates_url:
 
 # %% Finally, downloading each one of them for all the years:
 
-for i in download_urls:
+for i in tqdm(download_urls):
     r = await_response(i)
     
     (year, month) = re.search(r"\d{4}-\d{2}", i).group().split('-')  # pyright: ignore[reportOptionalMemberAccess]
-    name = re.search(r'(gen9[^"/]+.json.gz)', i).group()  # pyright: ignore[reportOptionalMemberAccess]
+    name = re.search(r'(gen9[^"/]+.json)', i).group()  # pyright: ignore[reportOptionalMemberAccess]
 
-    file = Path(BRONZE_PATH, year, month, name)
+    file = Path(BRONZE_PATH, "Smogon", year, month, name)
     file.parent.mkdir(parents=True, exist_ok=True)
     file.write_bytes(r.content)  # pyright: ignore[reportUnusedCallResult]
     
