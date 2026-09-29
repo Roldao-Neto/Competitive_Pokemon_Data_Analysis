@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 
 import requests
-from tqdm import tqdm
+from tqdm import tqdm  # pyright: ignore[reportMissingModuleSource]
 
 # %% Global Variables
 
@@ -90,13 +90,17 @@ for item in dates_url:
 # %% Finally, downloading each one of them for all the years:
 
 for i in tqdm(download_urls):
-    r = await_response(i)
-    
     (year, month) = re.search(r"\d{4}-\d{2}", i).group().split('-')  # pyright: ignore[reportOptionalMemberAccess]
     name = re.search(r'(gen9[^"/]+.json)', i).group()  # pyright: ignore[reportOptionalMemberAccess]
 
     file = Path(BRONZE_PATH, "Smogon", year, month, name)
+    
     file.parent.mkdir(parents=True, exist_ok=True)
+    
+    if file.exists():
+        continue
+
+    r = await_response(i)
     file.write_bytes(r.content)  # pyright: ignore[reportUnusedCallResult]
     
     time.sleep(1)
