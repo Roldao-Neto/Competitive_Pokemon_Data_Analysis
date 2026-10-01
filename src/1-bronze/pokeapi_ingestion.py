@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import cast
 
 import requests
-from tqdm import tqdm  # pyright: ignore[reportMissingModuleSource]
+from tqdm import tqdm
 
 # %% Global Variables
 

@@ -222,3 +222,4 @@ docs
 .DS_Store
 
 *.json
+*.parquet

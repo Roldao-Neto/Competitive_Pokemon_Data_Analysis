@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 
 import requests
-from tqdm import tqdm  # pyright: ignore[reportMissingModuleSource]
+from tqdm import tqdm
 
 # %% Global Variables
 
