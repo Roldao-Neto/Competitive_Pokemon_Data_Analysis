@@ -17,14 +17,16 @@ Competitive_Pokemon_Data_Analysis/
 │   ├── 1-bronze/                   # raw extracted data (Smogon + PokeAPI)
 │   │   ├── PokeAPI/
 │   │   │   └── <endpoint>/         # <endpoint>_<id>.json, one file per resource
-│   │   └── Smogon/
-│   │       └── <year>/<month>/     # gen9<tier>-<rating cutoff>.json
+│   │   ├── Smogon/
+│   │   │   └── <year>/<month>/     # gen9<tier>-<rating cutoff>.json
+│   │   └── provenance.csv          # source URL, SHA-256, size and date of every bronze file (versioned)
 │   ├── 2-silver/                   # cleaned/transformed data
 │   └── 3-gold/                     # final/analysis-ready data
 ├── src/
 │   ├── 1-bronze/
 │   │   ├── pokeapi_ingestion.py    # pokeapi data extraction code
-│   │   └── smogon_ingestion.py     # smogon data extraction code
+│   │   ├── smogon_ingestion.py     # smogon data extraction code
+│   │   └── provenance.py           # writes data/1-bronze/provenance.csv
 │   ├── 2-silver/
 │   └── 3-gold/
 ├── pyproject.toml                  # project deps, use uv for easy sync
@@ -42,11 +44,26 @@ uv sync
 cd src/1-bronze
 uv run python smogon_ingestion.py
 uv run python pokeapi_ingestion.py
+uv run python provenance.py
 ```
 
 - The scripts resolve `data/` relative to the current directory, so they must be run from inside their own `src/<layer>/` folder.
 - The data is not versioned (~4.5 GB in the bronze layer alone), so it has to be downloaded by running the scripts.
 - Both scripts skip files that were already downloaded, so they can be interrupted and re-run, and re-running them later only fetches new data (e.g. a new Smogon month).
+
+## Data provenance
+
+The data is not versioned, so its provenance is: `data/1-bronze/provenance.csv` lists every downloaded file with:
+
+- `source`: `PokeAPI` or `Smogon`
+- `path`: where the file is stored, relative to `data/`
+- `url`: where it was downloaded from
+- `size_bytes` and `sha256`: fingerprint of the content, to check that a re-download is the same data
+- `file_modified_utc`: when the file was written to disk (UTC). The ingestion scripts don't log the download time, so this is taken from the file system
+
+The PokeAPI data was downloaded from deploy `168b1e89467054cda2e7df43ccebbb69b459497a` (from `https://pokeapi.co/api/v2/meta`).
+
+The silver and gold layers are derived only from the bronze files by the code in `src/`, so this file together with the git history also gives their provenance. Run `provenance.py` again after every new download.
 
 ## Decisions made
 
