@@ -1,0 +1,282 @@
+erDiagram
+
+    %% Tabelas
+
+    METAGAME{
+        TIMESTAMPTZ date PK
+        INTEGER category_id PK, FK
+        INTEGER rating PK
+        INTEGER n_battles
+    }
+    
+    USAGE{
+        SERIAL usage_id PK
+        TIMESTAMPTZ date FK, UK
+        INTEGER category_id FK, UK
+        INTEGER rating FK, UK
+        INTEGER pokemon_id FK, UK
+        INTEGER raw_count
+        DOUBLE_PRECISION usage
+        INTEGER viability_players
+        SMALLINT viability_top_gxe
+        SMALLINT viability_99th_gxe
+        SMALLINT viability_95th_gxe
+    }
+
+    POKEMON{
+        SERIAL id PK
+        TEXT name UK
+        INTEGER weight
+        INTEGER species_id FK
+        INTEGER hp
+        INTEGER attack
+        INTEGER defense
+        INTEGER special_attack
+        INTEGER special_defense
+        INTEGER speed
+        INTEGER type_1_id FK
+        INTEGER type_2_id FK
+        INTEGER ability_1_id FK
+        INTEGER ability_2_id FK
+        INTEGER hidden_ability_id FK
+        BOOLEAN is_fully_evolved
+    }
+
+    ABILITY {
+        INTEGER id PK
+        TEXT name
+        TEXT effect
+        TEXT short_effect
+        SMALLINT generation
+    }
+
+    ITEM {
+        INTEGER id PK
+        TEXT name
+        INTEGER fling_power
+        TEXT fling_effect
+        INTEGER category_id FK
+        TEXT effect
+        TEXT short_effect
+    }
+
+    MOVE {
+        INTEGER id PK
+        TEXT name
+        SMALLINT accuracy
+        SMALLINT effect_chance
+        SMALLINT pp
+        SMALLINT priority
+        INTEGER power
+        INTEGER damage_class_id FK
+        INTEGER target_id FK
+        INTEGER type_id FK
+        SMALLINT generation
+        SMALLINT min_hits           
+        SMALLINT max_hits            
+        SMALLINT min_turns          
+        SMALLINT max_turns          
+        SMALLINT drain               
+        SMALLINT healing             
+        SMALLINT crit_rate            
+        SMALLINT ailment_chance         
+        SMALLINT flinch_chance         
+        SMALLINT stat_chance 
+        INTEGER ailment_id FK
+        INTEGER category_id FK 
+        TEXT effect
+        TEXT short_effect
+    }
+
+    NATURE{
+        INTEGER id PK
+        TEXT name
+        INTEGER decreased_stat_id FK
+        INTEGER increased_stat_id FK
+        INTEGER likes_flavor_id FK
+        INTEGER hates_flavor_id FK
+    }
+
+    TYPE{
+        INTEGER id PK
+        TEXT name
+        SMALLINT generation
+    }
+
+    %% "Auxiliary tables"
+
+    STAT{
+        SERIAL id PK
+        TEXT name
+    }
+
+    MOVE_CATEGORY{
+        SERIAL id PK
+        TEXT name
+    }
+
+    TARGET{
+        SERIAL id PK
+        TEXT name
+    }
+
+    AILMENT{
+        SERIAL id PK
+        TEXT name
+    }
+
+    DAMAGE_CLASS{
+        SERIAL id PK
+        TEXT name
+    }
+
+    SMOGON_CATEGORY{
+        SERIAL id PK
+        TEXT code
+        TEXT name
+        SMALLINT tier_order 
+    }
+
+    ITEM_CATEGORY{
+        SERIAL id PK
+        TEXT name
+    }
+
+    FLAVOR{
+        SERIAL id PK
+        TEXT name
+    }
+
+    SPECIES{
+        INTEGER id PK
+        BOOLEAN is_legendary
+        BOOLEAN is_mythical
+        SMALLINT generation
+    }
+
+    %% Relationship N:N Tables
+
+    TYPE_EFFECT{
+        INTEGER attacking_type_id PK, FK
+        INTEGER defending_type_id PK, FK
+        NUMERIC(2,1) multiplier
+    }
+
+    POKEMON_MOVES{
+        INTEGER pokemon_id PK, FK
+        INTEGER move_id PK, FK
+    }
+
+    MOVE_STAT_CHANGE { 
+        INTEGER move_id PK, FK
+        INTEGER stat_id PK, FK
+        SMALLINT change 
+    }
+
+    USAGE_ABILITY{
+        INTEGER usage_id PK, FK
+        INTEGER ability_id PK, FK
+        DOUBLE_PRECISION weight
+    }
+
+    USAGE_ITEM{
+        INTEGER usage_id PK, FK
+        INTEGER item_id PK, FK
+        DOUBLE_PRECISION weight
+    }
+
+    USAGE_MOVE{
+        INTEGER usage_id PK, FK
+        INTEGER move_id PK, FK
+        DOUBLE_PRECISION weight
+    }
+
+    USAGE_SPREAD{
+        INTEGER usage_id PK, FK
+        INTEGER nature_id PK, FK
+        SMALLINT hp_ev PK
+        SMALLINT attack_ev PK
+        SMALLINT defense_ev PK
+        SMALLINT special_attack_ev PK
+        SMALLINT special_defense_ev PK
+        SMALLINT speed_ev PK
+        DOUBLE_PRECISION weight
+    }
+
+    USAGE_TERA_TYPE{
+        INTEGER usage_id PK, FK
+        INTEGER type_id PK, FK
+        DOUBLE_PRECISION weight
+    }
+
+    USAGE_TEAMMATE{
+        INTEGER usage_id PK, FK
+        INTEGER teammate_id PK, FK
+        DOUBLE_PRECISION weight
+    }
+
+    USAGE_CHECK_COUNTER{
+        INTEGER usage_id PK, FK
+        INTEGER counter_id PK, FK
+        DOUBLE_PRECISION n "encounters"
+        DOUBLE_PRECISION p "P(counter KOs or forces out)"
+        DOUBLE_PRECISION d "standard deviation of p"
+    }
+
+    %% Relações
+
+    MOVE ||--o{ MOVE_STAT_CHANGE : move_id
+    STAT ||--o{ MOVE_STAT_CHANGE : stat_id
+
+    POKEMON ||--o{ POKEMON_MOVES : pokemon_id
+    MOVE ||--o{ POKEMON_MOVES : move_id
+
+    POKEMON }o--o| TYPE : type_1_id
+    POKEMON }o--o| TYPE : type_2_id
+
+    POKEMON }o--o| ABILITY : ability_1_id
+    POKEMON }o--o| ABILITY : ability_2_id
+    POKEMON }o--o| ABILITY : hidden_ability_id
+
+    %% Linked by date, category and rating
+    METAGAME ||--o{ USAGE : "date, category_id, rating"
+    METAGAME }o--|| SMOGON_CATEGORY : category_id
+
+    USAGE }o--|| POKEMON : pokemon_id
+
+    ITEM_CATEGORY |o--o{ ITEM : category_id
+
+    DAMAGE_CLASS |o--o{ MOVE : damage_class_id
+    AILMENT |o--o{ MOVE : ailment_id
+    TARGET |o--o{ MOVE : target_id
+
+    TYPE |o--o{ MOVE : type_id
+
+    MOVE_CATEGORY |o--o{ MOVE : category_id
+
+    STAT |o--o{ NATURE : increased_stat_id
+    STAT |o--o{ NATURE : decreased_stat_id
+
+    FLAVOR |o--o{ NATURE : likes_flavor_id
+    FLAVOR |o--o{ NATURE : hates_flavor_id
+
+    TYPE ||--o{ TYPE_EFFECT : attacking_type_id
+    TYPE ||--o{ TYPE_EFFECT : defending_type_id
+
+    SPECIES |o--o{ POKEMON : species_id
+
+    USAGE ||--o{ USAGE_ABILITY : usage_id
+    USAGE ||--o{ USAGE_ITEM : usage_id
+    USAGE ||--o{ USAGE_MOVE : usage_id
+    USAGE ||--o{ USAGE_SPREAD : usage_id
+    USAGE ||--o{ USAGE_TERA_TYPE : usage_id
+    USAGE ||--o{ USAGE_TEAMMATE : usage_id
+    USAGE ||--o{ USAGE_CHECK_COUNTER : usage_id
+
+    ABILITY ||--o{ USAGE_ABILITY : ability_id
+    ITEM ||--o{ USAGE_ITEM : item_id
+    MOVE ||--o{ USAGE_MOVE : move_id
+    NATURE ||--o{ USAGE_SPREAD : nature_id
+    TYPE ||--o{ USAGE_TERA_TYPE : type_id
+    POKEMON ||--o{ USAGE_TEAMMATE : teammate_id
+    POKEMON ||--o{ USAGE_CHECK_COUNTER : counter_id
