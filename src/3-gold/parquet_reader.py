@@ -3,6 +3,7 @@ First Step (1):
 This script re-checks what the Silver Layer delivers: the columns of every parquet.
 The Result will be used to check all attributes again and model the DER for the SQL database.
 """
+
 # %% Imports
 
 from pathlib import Path
