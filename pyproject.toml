@@ -10,5 +10,6 @@ dependencies = [
     "pyarrow>=25.0.1",
     "requests>=2.34.2",
     "sqlalchemy>=2.0",
+    "streamlit>=1.67.0",
     "tqdm>=4.70.0",
 ]

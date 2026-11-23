@@ -20,15 +20,18 @@ Competitive_Pokemon_Data_Analysis/
 │   │   ├── Smogon/
 │   │   │   └── <year>/<month>/     # gen9<tier>-<rating cutoff>.json
 │   │   └── provenance.csv          # source URL, SHA-256, size and date of every bronze file (versioned)
-│   ├── 2-silver/                   # cleaned/transformed data
-│   └── 3-gold/                     # final/analysis-ready data
+│   ├── 2-silver/                   # cleaned data as parquet (PokeAPI + Smogon)
+│   └── 3-gold/                     # empty: the gold layer lives in PostgreSQL
 ├── src/
 │   ├── 1-bronze/
 │   │   ├── pokeapi_ingestion.py    # pokeapi data extraction code
 │   │   ├── smogon_ingestion.py     # smogon data extraction code
 │   │   └── provenance.py           # writes data/1-bronze/provenance.csv
-│   ├── 2-silver/
-│   └── 3-gold/
+│   ├── 2-silver/                   # pokeapi_cleaning.ipynb, smogon_cleaning.ipynb -> parquets
+│   ├── 3-gold/                     # parquet_postgres.ipynb (loads PostgreSQL), models/, DER, name mapping CSVs
+│   └── 4-dashboard/                # Streamlit dashboard over the gold database (in Portuguese)
+├── docker-compose.yml              # PostgreSQL 18 for the gold layer
+├── Dockerfile
 ├── pyproject.toml                  # project deps, use uv for easy sync
 ├── uv.lock
 ├── LICENSE
@@ -37,7 +40,7 @@ Competitive_Pokemon_Data_Analysis/
 
 ## How to run
 
-Requires Python 3.14+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.14+, [uv](https://docs.astral.sh/uv/) and Docker.
 
 ```bash
 uv sync
@@ -50,6 +53,12 @@ uv run python provenance.py
 - The scripts resolve `data/` relative to the current directory, so they must be run from inside their own `src/<layer>/` folder.
 - The data is not versioned (~4.5 GB in the bronze layer alone), so it has to be downloaded by running the scripts.
 - Both scripts skip files that were already downloaded, so they can be interrupted and re-run, and re-running them later only fetches new data (e.g. a new Smogon month).
+
+Then, from the repository root:
+
+1. **Silver:** run `src/2-silver/pokeapi_cleaning.ipynb` and `src/2-silver/smogon_cleaning.ipynb`.
+2. **Gold:** start the database with `docker compose up -d`, then run `src/3-gold/parquet_postgres.ipynb` (`RESET_SCHEMA = True` rebuilds the schema; with `False`, a re-run only upserts). The full load takes ~15 min and ~10 GB.
+3. **Dashboard:** `uv run streamlit run src/4-dashboard/app.py`, then open http://localhost:8501.
 
 ## Data provenance
 
