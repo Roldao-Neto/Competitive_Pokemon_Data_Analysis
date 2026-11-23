@@ -21,9 +21,7 @@ class Pokemon(Base):
     type_2_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("type.id"))
     ability_1_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("ability.id"))
     ability_2_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("ability.id"))
-    hidden_ability_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("ability.id")
-    )
+    hidden_ability_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("ability.id"))
     is_fully_evolved: Mapped[bool] = mapped_column(Boolean)
 
 
